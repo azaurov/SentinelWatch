@@ -63,4 +63,48 @@ Run all four; abort and fix if any fails.
 
    Commit both files together in a single `docs:` commit and push.
 
-3. **Do not touch the GitHub profile repo** (`github.com/azaurov/azaurov`) — SentinelWatch isn't listed there and adding it is out of scope for a deploy.
+3. **Decide whether this deploy warrants a release.** Not every deploy needs a tagged release — docs-only or chore commits shouldn't bump the version. Use this rubric:
+
+   | Change type | Version bump | Tag/release? |
+   |---|---|---|
+   | Bug fix, internal refactor, deps only | patch (`1.0.0` → `1.0.1`) | yes |
+   | New feature, backwards-compatible | minor (`1.0.0` → `1.1.0`) | yes |
+   | Breaking API/UX change (env var rename, removed IPC method, etc.) | major (`1.0.0` → `2.0.0`) | yes, call it out in release notes |
+   | `docs:` commit only, `chore:` commit only (no version bump) | none | no |
+   | `chore: bump version to X.Y.Z` is itself a commit | — | always accompanied by tag |
+
+   If this deploy qualifies, run the versioning block below. If it's a docs-only follow-up to an already-released version, skip this step entirely.
+
+   **Versioning block** (run once per release):
+
+   ```
+   # 1. Bump version in package.json (manually edit the "version" field, or use npm)
+   npm version patch   # or minor / major — runs git tag + commit in one step
+   # If you used `npm version`, skip step 2 (it created the tag). Otherwise:
+   # git tag -a v1.1.0 -m "<release notes summary>"
+
+   # 2. Push the version commit + tag
+   git push origin main --follow-tags
+
+   # 3. Create the GitHub release from the tag.
+   #    Use --notes-file so multi-paragraph notes render correctly.
+   git tag -l --format='%(contents)' v1.1.0 > /tmp/sw-release-notes.md
+   gh release create v1.1.0 \
+     --title "v1.1.0 — <short summary>" \
+     --notes-file /tmp/sw-release-notes.md \
+     --target main
+   rm /tmp/sw-release-notes.md
+
+   # 4. Verify
+   gh release view v1.1.0 --json name,tagName,publishedAt,url,isPrerelease
+   curl -s https://api.github.com/repos/azaurov/SentinelWatch/tags | grep '"name"'
+   ```
+
+   **Release notes template** — annotated tag message and release body share the same text. Cover these sections in order:
+   - One-line headline (what changed at a glance)
+   - `Changes since vX.Y.Z:` bulleted list — `feat:` / `fix:` / `chore:` / `docs:` headings grouped
+   - `Breaking:` (or "none") — for renames, removals, env var changes
+   - `Upgrade notes:` — exact `.env` key renames, one-time install commands (e.g., the Linux SUID sandbox one-liner), new optional dependencies
+   - Don't repeat the README — link to it instead
+
+4. **Do not touch the GitHub profile repo** (`github.com/azaurov/azaurov`) — SentinelWatch isn't listed there and adding it is out of scope for a deploy.
