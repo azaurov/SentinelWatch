@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self';" />
+  <title>SentinelWatch</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- ── Header ───────────────────────────────────────────────── -->
+  <header class="app-header">
+    <div class="logo">
+      <span class="logo-icon">◈</span>
+      <span class="logo-text">SentinelWatch</span>
+    </div>
+    <div class="header-stats">
+      <div class="stat-chip" id="stat-total">
+        <span class="stat-label">Processes</span>
+        <span class="stat-value" id="total-count">—</span>
+      </div>
+      <div class="stat-chip warn" id="stat-hanging">
+        <span class="stat-label">Hanging</span>
+        <span class="stat-value" id="hanging-count">—</span>
+      </div>
+      <div class="stat-chip" id="stat-cpu">
+        <span class="stat-label">Avg CPU</span>
+        <span class="stat-value" id="avg-cpu">—</span>
+      </div>
+      <div class="stat-chip" id="stat-mem">
+        <span class="stat-label">Top RSS</span>
+        <span class="stat-value" id="top-rss">—</span>
+      </div>
+    </div>
+    <div class="header-right">
+      <span class="pulse-dot" id="pulse-dot"></span>
+      <span class="update-label" id="update-time">Waiting…</span>
+    </div>
+  </header>
+
+  <!-- ── Toolbar ──────────────────────────────────────────────── -->
+  <div class="toolbar">
+    <div class="search-wrap">
+      <span class="search-icon">⌕</span>
+      <input type="text" id="search-input" class="search-input" placeholder="Filter by name or PID…" />
+      <button class="clear-btn" id="clear-search" title="Clear">✕</button>
+    </div>
+    <div class="filter-group">
+      <button class="filter-btn active" data-filter="all">All</button>
+      <button class="filter-btn" data-filter="hanging">⚠ Hanging</button>
+      <button class="filter-btn" data-filter="high">▲ High CPU</button>
+    </div>
+    <div class="sort-group">
+      <label class="sort-label">Sort</label>
+      <select id="sort-select" class="sort-select">
+        <option value="cpu">CPU %</option>
+        <option value="rss">Memory</option>
+        <option value="pid">PID</option>
+        <option value="command">Name</option>
+        <option value="cpuTime">CPU Time</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- ── Main layout: table + detail panel ────────────────────── -->
+  <div class="main-layout">
+
+    <!-- Process table -->
+    <div class="table-wrap" id="table-wrap">
+      <table class="process-table">
+        <thead>
+          <tr>
+            <th class="col-status">Status</th>
+            <th class="col-pid">PID</th>
+            <th class="col-name">Command</th>
+            <th class="col-cpu">CPU %</th>
+            <th class="col-mem">RSS (KB)</th>
+            <th class="col-time">CPU Time</th>
+            <th class="col-user">User</th>
+          </tr>
+        </thead>
+        <tbody id="process-tbody">
+          <tr class="placeholder-row">
+            <td colspan="7">Waiting for first poll…</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Detail panel (hidden until row clicked) -->
+    <aside class="detail-panel" id="detail-panel">
+      <button class="close-btn" id="close-detail">✕</button>
+      <div class="detail-header">
+        <div class="detail-status-badge" id="d-badge">OK</div>
+        <div class="detail-title" id="d-title">—</div>
+        <div class="detail-pid" id="d-pid">PID —</div>
+      </div>
+
+      <div class="detail-grid">
+        <div class="detail-item">
+          <span class="di-label">CPU %</span>
+          <span class="di-value" id="d-cpu">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="di-label">RSS</span>
+          <span class="di-value" id="d-rss">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="di-label">CPU Time</span>
+          <span class="di-value" id="d-cputime">—</span>
+        </div>
+        <div class="detail-item">
+          <span class="di-label">User</span>
+          <span class="di-value" id="d-user">—</span>
+        </div>
+        <div class="detail-item" id="hang-item" style="display:none;">
+          <span class="di-label">Hanging for</span>
+          <span class="di-value di-warn" id="d-hang">—</span>
+        </div>
+      </div>
+
+      <div class="detail-command-wrap">
+        <span class="di-label">Full command</span>
+        <div class="detail-command" id="d-command">—</div>
+      </div>
+
+      <div class="detail-actions">
+        <button class="btn-diagnose" id="btn-diagnose">
+          <span class="btn-icon">◈</span> Diagnose with AI
+        </button>
+        <button class="btn-kill" id="btn-kill">
+          <span class="btn-icon">✕</span> Kill Process
+        </button>
+      </div>
+
+      <!-- AI diagnosis output -->
+      <div class="diagnosis-wrap" id="diagnosis-wrap" style="display:none;">
+        <div class="diagnosis-header">
+          <span class="diagnosis-icon">◈</span> AI Diagnosis
+        </div>
+        <div class="diagnosis-body" id="diagnosis-body"></div>
+      </div>
+
+      <div class="diagnosis-error" id="diagnosis-error" style="display:none;"></div>
+    </aside>
+
+  </div>
+
+  <!-- Kill confirmation overlay -->
+  <div class="overlay" id="kill-overlay" style="display:none;">
+    <div class="confirm-box">
+      <div class="confirm-title">Kill Process?</div>
+      <div class="confirm-desc" id="confirm-desc"></div>
+      <div class="confirm-actions">
+        <button class="btn-cancel" id="confirm-cancel">Cancel</button>
+        <button class="btn-confirm-kill" id="confirm-kill">Kill</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="renderer.js"></script>
+</body>
+</html>

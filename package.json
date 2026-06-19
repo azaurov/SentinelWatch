@@ -1,0 +1,16 @@
+{
+  "name": "sentinelwatch",
+  "version": "1.0.0",
+  "description": "AI-powered desktop process monitor",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --enable-logging"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "devDependencies": {
+    "electron": "^33.0.0"
+  }
+}
