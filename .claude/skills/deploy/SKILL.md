@@ -107,4 +107,4 @@ Run all four; abort and fix if any fails.
    - `Upgrade notes:` — exact `.env` key renames, one-time install commands (e.g., the Linux SUID sandbox one-liner), new optional dependencies
    - Don't repeat the README — link to it instead
 
-4. **Do not touch the GitHub profile repo** (`github.com/azaurov/azaurov`) — SentinelWatch isn't listed there and adding it is out of scope for a deploy.
+4. **Update the GitHub profile repo** (`github.com/azaurov/azaurov`) if SentinelWatch is listed there. As of v1.1.0 it is — find the SentinelWatch section, update the provider/model/feature bullets to match `main.js` defaults and any new capabilities added this session, and commit with `docs: update SentinelWatch section — <short note>`. If a future release removes the listing, skip this step instead.
