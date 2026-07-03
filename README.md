@@ -57,6 +57,27 @@ npm run dev      # launch with verbose Electron logging
 
 On Windows you can also double-click `launch.bat` or `silent.vbs` (runs without a terminal window).
 
+## Building installers
+
+Bundled installers for Linux, macOS, and Windows are built with
+[`electron-builder`](https://www.electron.build/):
+
+```bash
+npm run dist        # build for the current OS
+npm run dist:mac    # dmg + zip (must run on macOS)
+npm run dist:win    # NSIS installer (.exe)
+npm run dist:linux  # AppImage + .deb
+```
+
+Output goes to `dist/`. `electron-builder` can't cross-compile every target —
+`.dmg`/macOS builds require running on macOS (Apple's tooling isn't available
+elsewhere). Build each target on its native OS, or use a CI matrix (e.g.
+GitHub Actions with `runs-on: [ubuntu-latest, macos-latest, windows-latest]`).
+
+No app icon is bundled yet — builds fall back to Electron's default icon.
+Add a 1024×1024 `build/icon.png` and electron-builder will derive the
+platform-specific `.icns`/`.ico` formats from it automatically.
+
 ## Install shortcut (GitHub Pages)
 
 `docs/` contains a small installable PWA landing page for GitHub Pages
@@ -105,5 +126,6 @@ docs/                — GitHub Pages install-shortcut PWA (see "Install shortcu
 |---|---|
 | `electron` | Desktop window and IPC |
 | `dotenv` | Load API key from `.env` |
+| `electron-builder` | Build Linux/macOS/Windows installers (dev dependency) |
 
 The diagnose handler uses Node's built-in `fetch` to call Groq directly — no LLM SDK is required.
