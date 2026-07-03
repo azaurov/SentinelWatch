@@ -7,9 +7,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm start          # launch the Electron app
 npm run dev        # launch with verbose Electron logging (--enable-logging)
+npm run dist       # build an installer for the current platform (electron-builder)
+npm run dist:mac   # .dmg + .zip
+npm run dist:win   # NSIS installer (.exe)
+npm run dist:linux # AppImage + .deb
 ```
 
-No build step, no test suite, no lint config. Files are loaded directly by Electron.
+No test suite, no lint config. Files are loaded directly by Electron at runtime.
+`electron-builder` (config lives in the `build` key of `package.json`) packages
+installers into `dist/` (gitignored). Cross-building for a different OS than the
+host generally doesn't work — build macOS targets on macOS, Windows on Windows,
+Linux on Linux (or via a CI matrix).
 
 ## Project shape
 
