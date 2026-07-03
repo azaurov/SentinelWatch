@@ -57,6 +57,28 @@ npm run dev      # launch with verbose Electron logging
 
 On Windows you can also double-click `launch.bat` or `silent.vbs` (runs without a terminal window).
 
+## Building installers
+
+Bundled installers for Linux, macOS, and Windows are built with
+[`electron-builder`](https://www.electron.build/):
+
+```bash
+npm run dist         # build for the current platform
+npm run dist:mac     # .dmg + .zip
+npm run dist:win     # NSIS installer (.exe)
+npm run dist:linux   # AppImage + .deb
+```
+
+Output lands in `dist/` (gitignored). Cross-building for a different OS than
+the one you're running on generally requires that OS's native tooling (e.g.
+you can't produce a `.dmg` from Linux) — build each target on its own
+platform, or use a CI matrix.
+
+No app icon is bundled yet, so builds fall back to the default Electron
+icon. To brand it, add `build/icon.png` (1024x1024) to the repo —
+`electron-builder` derives the platform-specific `.icns`/`.ico` from it
+automatically.
+
 ## Install shortcut (GitHub Pages)
 
 `docs/` contains a small installable PWA landing page for GitHub Pages

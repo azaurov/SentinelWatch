@@ -3,14 +3,50 @@
   "version": "1.1.0",
   "description": "AI-powered desktop process monitor",
   "main": "main.js",
+  "author": "azaurov",
+  "license": "MIT",
   "scripts": {
     "start": "electron .",
-    "dev": "electron . --enable-logging"
+    "dev": "electron . --enable-logging",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win",
+    "dist:linux": "electron-builder --linux"
   },
   "dependencies": {
     "dotenv": "^16.4.5"
   },
   "devDependencies": {
-    "electron": "^39.8.5"
+    "electron": "^39.8.5",
+    "electron-builder": "^24.13.3"
+  },
+  "build": {
+    "appId": "com.azaurov.sentinelwatch",
+    "productName": "SentinelWatch",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "renderer/**/*",
+      "package.json",
+      "!docs/**/*"
+    ],
+    "mac": {
+      "category": "public.app-category.utilities",
+      "target": ["dmg", "zip"]
+    },
+    "win": {
+      "target": ["nsis"]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "category": "Utility"
+    }
   }
 }
