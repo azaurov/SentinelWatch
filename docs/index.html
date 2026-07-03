@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>SentinelWatch</title>
+<meta name="description" content="AI-powered desktop process monitor for Windows, macOS and Linux." />
+<meta name="theme-color" content="#0a0e1a" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="wrap">
+    <div class="hero">
+      <img src="icon.svg" alt="SentinelWatch icon" />
+      <h1>SentinelWatch</h1>
+      <p>AI-powered desktop process monitor. Add this page to your home screen for one-tap access to downloads, docs and release notes.</p>
+      <button id="install-btn">Install shortcut</button>
+      <p class="install-hint" id="install-hint">
+        On iPhone/iPad: tap the Share icon in Safari, then "Add to Home Screen".
+      </p>
+    </div>
+
+    <div class="card">
+      <span class="pill">● Desktop app — Windows / macOS / Linux</span>
+      <h2>What this shortcut is</h2>
+      <p style="font-size:13.5px;color:var(--text-secondary);line-height:1.6;">
+        SentinelWatch is an <strong style="color:var(--text-primary)">Electron desktop application</strong>.
+        It reads live process data and can terminate processes on your computer's operating system —
+        capabilities a phone browser cannot grant to any web page. Installing this page gives you a
+        home-screen icon that links straight back here for downloads and docs; it does not run the
+        process monitor itself on your phone.
+      </p>
+    </div>
+
+    <div class="card">
+      <h2>Features</h2>
+      <ul>
+        <li>Live process table updated every 5 seconds — CPU%, memory, accumulated CPU time, user</li>
+        <li>Hang detection: flags processes stuck above 10% CPU for 10+ minutes</li>
+        <li>One-click AI diagnosis powered by Groq</li>
+        <li>Filter, search and sort the process list; kill processes with confirmation</li>
+      </ul>
+    </div>
+
+    <div class="card">
+      <h2>Get the app</h2>
+      <div class="actions">
+        <a href="https://github.com/azaurov/SentinelWatch">Source on GitHub</a>
+        <a href="https://github.com/azaurov/SentinelWatch/releases">Releases</a>
+        <a href="https://github.com/azaurov/SentinelWatch#setup">Setup instructions</a>
+      </div>
+    </div>
+
+    <footer>
+      <a href="https://github.com/azaurov/SentinelWatch">github.com/azaurov/SentinelWatch</a>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

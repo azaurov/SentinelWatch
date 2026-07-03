@@ -1,0 +1,131 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg-base:      #0a0e1a;
+  --bg-surface:   #0f1526;
+  --bg-raised:    #161d32;
+  --border:       #1e2d4a;
+  --text-primary: #e2e8f8;
+  --text-secondary:#7a90b8;
+  --text-muted:   #4a5e80;
+  --accent:       #4f8ef7;
+  --accent-glow:  rgba(79,142,247,0.18);
+  --ok:           #22c55e;
+  --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --font-mono: 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font);
+}
+
+body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48px 20px 80px;
+}
+
+.wrap { width: 100%; max-width: 640px; }
+
+.hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  margin-bottom: 40px;
+}
+
+.hero img { width: 88px; height: 88px; border-radius: 20px; box-shadow: 0 0 0 1px var(--border), 0 12px 32px var(--accent-glow); }
+
+.hero h1 { font-size: 26px; letter-spacing: .02em; }
+
+.hero p { color: var(--text-secondary); font-size: 14px; max-width: 480px; }
+
+#install-btn {
+  margin-top: 8px;
+  background: var(--accent);
+  color: #06101f;
+  border: none;
+  padding: 12px 26px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  display: none;
+}
+#install-btn.visible { display: inline-block; }
+#install-btn:active { transform: translateY(1px); }
+
+.install-hint {
+  color: var(--text-muted);
+  font-size: 12.5px;
+  max-width: 420px;
+  text-align: center;
+}
+
+.card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 22px 24px;
+  margin-bottom: 18px;
+}
+
+.card h2 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--text-secondary);
+  margin-bottom: 12px;
+}
+
+.card ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.card li { font-size: 13.5px; color: var(--text-primary); padding-left: 18px; position: relative; }
+.card li::before { content: "\25B8"; position: absolute; left: 0; color: var(--accent); }
+
+.card code {
+  font-family: var(--font-mono);
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 12.5px;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  color: var(--ok);
+  background: rgba(34,197,94,0.12);
+  border: 1px solid rgba(34,197,94,0.3);
+  padding: 3px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+}
+
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.actions a {
+  color: var(--text-primary);
+  text-decoration: none;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  padding: 9px 16px;
+  border-radius: 9px;
+  font-size: 13px;
+}
+.actions a:hover { border-color: var(--accent); color: var(--accent); }
+
+footer {
+  color: var(--text-muted);
+  font-size: 12px;
+  margin-top: 12px;
+  text-align: center;
+}
+footer a { color: var(--text-secondary); }

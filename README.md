@@ -57,6 +57,19 @@ npm run dev      # launch with verbose Electron logging
 
 On Windows you can also double-click `launch.bat` or `silent.vbs` (runs without a terminal window).
 
+## Install shortcut (GitHub Pages)
+
+`docs/` contains a small installable PWA landing page for GitHub Pages
+(`https://azaurov.github.io/SentinelWatch/` once Pages is enabled for this
+repo under **Settings → Pages → Source: `main` / `docs`**). Visiting it on a
+phone or desktop browser offers an "Add to Home Screen" / install prompt that
+adds a SentinelWatch icon linking back to downloads and docs.
+
+**This is a shortcut, not the app.** SentinelWatch itself is an Electron
+desktop app — process listing/killing needs OS APIs (`ps`, `Get-Process`,
+`taskkill`) that don't exist in a browser sandbox, so nothing under `docs/`
+can run the actual process monitor on a phone.
+
 ## How hang detection works
 
 The main process polls all running processes every 5 seconds via PowerShell (`Get-Process`) on Windows or `ps aux` on macOS/Linux. CPU% on Windows is computed from the delta in accumulated CPU time between polls, normalized by the number of cores. If a process stays at or above 10% CPU continuously for 10 minutes, it is flagged as hanging.
@@ -83,6 +96,7 @@ renderer/
   styles.css         — dark theme styles
 .claude/skills/
   deploy/SKILL.md    — canonical deploy workflow (commit, push, clean-clone verify)
+docs/                — GitHub Pages install-shortcut PWA (see "Install shortcut" above)
 ```
 
 ## Dependencies

@@ -83,6 +83,18 @@ when the panel is shorter than their content. The diagnosis block
 compressed by the flex layout and the user sees only the first few lines.
 If you add a new tall block to the panel, set `flex-shrink: 0` on it.
 
+## GitHub Pages install shortcut (`docs/`)
+
+`docs/` is a static, standalone PWA (manifest + service worker) meant for
+GitHub Pages (`Settings → Pages → Source: main / docs`). It is **not** the
+app — it's an installable landing page (icon + links to downloads/docs) for
+users who want a home-screen shortcut. It cannot and must not attempt to
+reimplement process listing/killing: those require OS APIs (`ps`,
+`Get-Process`, `taskkill`) unavailable to any browser-sandboxed page. Treat
+`docs/` as fully independent from `main.js`/`preload.js`/`renderer/` — it has
+its own `styles.css`, `app.js`, `manifest.json`, `service-worker.js`, and
+`icon.svg`, and shares only the color palette with `renderer/styles.css`.
+
 ## Linux SUID sandbox
 
 `npm install` does NOT set the SUID bit on
