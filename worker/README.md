@@ -66,7 +66,7 @@ or on failure:
 ## Config
 
 - `wrangler.toml [vars] GROQ_MODEL` — default model (matches `main.js`'s
-  default: `llama-3.3-70b-versatile`).
+  default: `openai/gpt-oss-120b`).
 - `wrangler.toml [vars] ALLOWED_ORIGIN` — CORS allowlist; defaults to `*`.
   Tighten this once the app is wired up, since Electron apps don't send a
   meaningful `Origin` by default.

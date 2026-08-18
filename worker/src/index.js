@@ -9,7 +9,7 @@
 //   wrangler secret put GROQ_API_KEY
 //
 // Vars (wrangler.toml [vars]):
-//   GROQ_MODEL     default model, e.g. "llama-3.3-70b-versatile"
+//   GROQ_MODEL     default model, e.g. "openai/gpt-oss-120b"
 //   ALLOWED_ORIGIN optional CORS allowlist ("*" or a comma-separated list)
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
@@ -65,7 +65,7 @@ export default {
       return json({ success: false, error: 'Missing required fields: pid, command' }, 400, cors);
     }
 
-    const model = env.GROQ_MODEL || 'llama-3.3-70b-versatile';
+    const model = env.GROQ_MODEL || 'openai/gpt-oss-120b';
     const hangMins = info.hangDurationMs ? Math.round(info.hangDurationMs / 60000) : '?';
 
     const systemPrompt =

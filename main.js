@@ -180,66 +180,39 @@ ipcMain.handle('kill-process', async (_evt, pid) => {
   });
 });
 
-// Diagnose via Groq (OpenAI-compatible chat-completions). Built-in fetch on Node 18+;
-// no extra deps needed.
-const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
-
+// Diagnose via the SentinelWatch Cloudflare Worker (worker/), which proxies
+// Groq's OpenAI-compatible chat-completions API and holds GROQ_API_KEY
+// server-side. Built-in fetch on Node 18+; no extra deps needed.
 ipcMain.handle('diagnose-process', async (_evt, info) => {
-  if (!process.env.GROQ_API_KEY) {
-    return { success: false, error: 'GROQ_API_KEY not set in .env' };
+  if (!process.env.SENTINELWATCH_WORKER_URL) {
+    return { success: false, error: 'SENTINELWATCH_WORKER_URL not set in .env' };
   }
-  const model = process.env.GROQ_MODEL || 'llama-3.3-70b-versatile';
-
-  const hangMins = info.hangDurationMs ? Math.round(info.hangDurationMs / 60000) : '?';
-
-  const systemPrompt =
-    'You are a senior systems engineer diagnosing a potentially hanging process. ' +
-    'Answer in this exact structure (keep it under 220 words):\n' +
-    '**What it is:** one sentence.\n' +
-    '**Why it may be hanging:** 2–3 bullet points.\n' +
-    '**Risk of killing:** Low / Medium / High — one sentence reason.\n' +
-    '**Recommended action:** one clear sentence.';
-
-  const userPrompt =
-    `Process snapshot:\n` +
-    `- PID: ${info.pid}\n` +
-    `- Command: ${info.command}\n` +
-    `- CPU%: ${Number(info.cpu).toFixed(1)}%\n` +
-    `- Resident memory: ${info.rss} KB\n` +
-    `- Accumulated CPU time: ${info.cpuTime}s\n` +
-    `- Continuously high CPU for: ${hangMins} minutes\n` +
-    `- Platform: ${os.platform()} (${os.arch()}, ${NUM_CORES} cores)`;
 
   try {
-    const resp = await fetch(GROQ_URL, {
+    const resp = await fetch(process.env.SENTINELWATCH_WORKER_URL, {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model,
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 512,
-        stream: false,
+        pid: info.pid,
+        command: info.command,
+        cpu: info.cpu,
+        rss: info.rss,
+        cpuTime: info.cpuTime,
+        hangDurationMs: info.hangDurationMs,
+        platform: `${os.platform()} (${os.arch()}, ${NUM_CORES} cores)`,
       }),
     });
 
     if (!resp.ok) {
       const errBody = await resp.text().catch(() => '');
-      return { success: false, error: `Groq ${resp.status}: ${errBody.slice(0, 200)}` };
+      return { success: false, error: `Worker ${resp.status}: ${errBody.slice(0, 200)}` };
     }
 
     const data = await resp.json();
-    const diagnosis = data?.choices?.[0]?.message?.content;
-    if (!diagnosis) {
-      return { success: false, error: 'Groq returned no content' };
+    if (!data.success) {
+      return { success: false, error: data.error || 'Worker returned no diagnosis' };
     }
-    return { success: true, diagnosis };
+    return { success: true, diagnosis: data.diagnosis };
   } catch (err) {
     return { success: false, error: err.message };
   }

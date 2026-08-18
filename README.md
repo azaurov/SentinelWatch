@@ -10,7 +10,7 @@ An Electron desktop app that monitors all running system processes in real time,
 - Hang detection: flags any process that stays above 10% CPU for 10 consecutive minutes
 - Per-process status badges: OK / HIGH CPU / HANGING
 - Filter by All / Hanging / High CPU; search by name or PID; sort by CPU, memory, PID, CPU time, or name
-- Detail panel with one-click AI diagnosis powered by **Groq** (default `llama-3.3-70b-versatile`)
+- Detail panel with one-click AI diagnosis powered by **Groq** (default `openai/gpt-oss-120b`)
 - Detail panel stays open after a process dies so you can finish reading the diagnosis
 - Kill process with confirmation dialog
 - Works on Windows (PowerShell) and macOS/Linux (`ps aux`)
@@ -18,7 +18,8 @@ An Electron desktop app that monitors all running system processes in real time,
 ## Requirements
 
 - Node.js 18+ (uses built-in `fetch`)
-- A [Groq API key](https://console.groq.com/keys)
+- A deployed SentinelWatch Cloudflare Worker (see `worker/README.md`), which holds
+  a [Groq API key](https://console.groq.com/keys) as a Cloudflare secret
 
 ## Setup
 
@@ -26,12 +27,21 @@ An Electron desktop app that monitors all running system processes in real time,
 npm install
 ```
 
-Create a `.env` file in the project root:
+Deploy the Worker (one-time; see `worker/README.md` for details):
+
+```bash
+cd worker
+npm install
+npx wrangler login
+npx wrangler secret put GROQ_API_KEY
+npm run deploy
+```
+
+`wrangler deploy` prints a `*.workers.dev` URL. Create a `.env` file in the
+project root with that URL:
 
 ```
-GROQ_API_KEY=gsk_...
-# Optional: override the diagnosis model
-# GROQ_MODEL=llama-3.3-70b-versatile
+SENTINELWATCH_WORKER_URL=https://sentinelwatch-groq-proxy.your-subdomain.workers.dev
 ```
 
 ### Linux install note
@@ -98,14 +108,19 @@ The main process polls all running processes every 5 seconds via PowerShell (`Ge
 
 ## AI diagnosis
 
-Clicking **Diagnose with AI** on a selected process sends a snapshot (PID, command, CPU%, memory, accumulated CPU time, hang duration, platform) to Groq's OpenAI-compatible chat-completions endpoint and asks it to explain:
+Clicking **Diagnose with AI** on a selected process sends a snapshot (PID, command, CPU%, memory, accumulated CPU time, hang duration, platform) to the SentinelWatch Cloudflare Worker (`worker/`, deployed separately — see `worker/README.md`), which proxies it to Groq's OpenAI-compatible chat-completions endpoint and asks it to explain:
 
 - What the process is
 - Why it may be hanging
 - The risk of killing it
 - A recommended action
 
-The API key is read from `.env` at runtime — never bundled into the app. Override the model by setting `GROQ_MODEL` in `.env` (any Groq-supported model ID; `llama-3.1-8b-instant` is faster, `openai/gpt-oss-120b` is larger).
+The Groq API key never touches the desktop app — it's a Cloudflare secret on
+the Worker. `main.js` only needs `SENTINELWATCH_WORKER_URL` in `.env`.
+Override the model by setting `GROQ_MODEL` in `worker/wrangler.toml` (any
+Groq-supported model ID — check `GET /openai/v1/models` against your key,
+since availability changes; `openai/gpt-oss-20b` is faster,
+`openai/gpt-oss-120b` is larger) and redeploying the Worker.
 
 ## Project structure
 
@@ -119,6 +134,7 @@ renderer/
 .claude/skills/
   deploy/SKILL.md    — canonical deploy workflow (commit, push, clean-clone verify)
 docs/                — GitHub Pages install-shortcut PWA (see "Install shortcut" above)
+worker/              — Cloudflare Worker: proxies AI diagnosis requests to Groq (see worker/README.md)
 ```
 
 ## Dependencies
@@ -126,6 +142,6 @@ docs/                — GitHub Pages install-shortcut PWA (see "Install shortcu
 | Package | Purpose |
 |---|---|
 | `electron` | Desktop window and IPC |
-| `dotenv` | Load API key from `.env` |
+| `dotenv` | Load `SENTINELWATCH_WORKER_URL` from `.env` |
 
 The diagnose handler uses Node's built-in `fetch` to call Groq directly — no LLM SDK is required.

@@ -36,27 +36,37 @@ Single main process (`main.js`), single preload (`preload.js`), renderer (`rende
 | Renderer call | IPC channel | Main handler |
 |---|---|---|
 | `window.sentinel.onProcessUpdate(cb)` | `process-update` (push from main) | `mainWindow.webContents.send` |
-| `window.sentinel.diagnoseProcess(info)` | `diagnose-process` (invoke) | Groq chat-completions fetch |
+| `window.sentinel.diagnoseProcess(info)` | `diagnose-process` (invoke) | fetch to the SentinelWatch Worker |
 | `window.sentinel.killProcess(pid)` | `kill-process` (invoke) | `taskkill`/`kill -9` via `exec` |
 
 If you add a method, update **both** `preload.js` (expose it) and `renderer/renderer.js` (call it).
 The preload is the only place that touches `ipcRenderer` directly.
 
-## AI diagnosis provider (Groq)
+## AI diagnosis provider (Groq, via Cloudflare Worker)
 
-`main.js` calls `https://api.groq.com/openai/v1/chat/completions` directly via Node 18+
-built-in `fetch`. No external SDK. Reads `process.env.GROQ_API_KEY` and optional
-`process.env.GROQ_MODEL` (defaults to `llama-3.3-70b-versatile`; see `.env.example` for alternatives).
+`main.js` no longer calls Groq directly. It POSTs the process snapshot to
+`process.env.SENTINELWATCH_WORKER_URL` (a deployed `worker/` Worker — see
+`worker/README.md`), which holds `GROQ_API_KEY` as a Cloudflare secret and
+proxies to `https://api.groq.com/openai/v1/chat/completions`. `main.js` uses
+Node 18+ built-in `fetch`; no external SDK either side. The Worker's default
+model (`worker/wrangler.toml` `[vars] GROQ_MODEL`) is `openai/gpt-oss-120b`.
 
-**Prompt structure**: system message carries the formatting instructions
-(`**What it is:**` etc.); user message carries the process snapshot. Response
-is rendered as-is by `formatDiagnosis()` in `renderer.js` (converts `**bold**` and bullet lines to HTML spans — no markdown library).
+**Prompt structure** (built in `worker/src/index.js`): system message carries
+the formatting instructions (`**What it is:**` etc.); user message carries the
+process snapshot. Response is rendered as-is by `formatDiagnosis()` in
+`renderer.js` (converts `**bold**` and bullet lines to HTML spans — no
+markdown library).
 
 **If you ever switch providers**, you must also update:
-- `main.js` (URL, headers, request body shape, env var name)
-- `.env.example` (document new key)
+- `worker/src/index.js` (URL, headers, request body shape, env var name)
+- `worker/wrangler.toml` and `worker/.dev.vars.example` (document new secret/vars)
+- `.env.example` (if the app-facing contract changes)
 - `README.md` (Requirements + Setup sections)
 - This file (the provider section above)
+
+**If you change the Worker's request/response contract**, update `main.js`'s
+`diagnose-process` handler to match — it's a thin passthrough of `info` to the
+Worker and expects back `{ success, diagnosis }` or `{ success: false, error }`.
 
 ## Hang detection
 
@@ -119,7 +129,8 @@ the SUID sandbox may still fail. Workaround:
 
 ## What NOT to commit
 
-`.env` contains a real `GROQ_API_KEY`. `.gitignore` already excludes it.
+`.env` contains `SENTINELWATCH_WORKER_URL`; `worker/.dev.vars` (if present)
+contains a real `GROQ_API_KEY`. `.gitignore` already excludes both.
 **Never use `git add -A` or `git add .`** — stage files explicitly by name.
 
 ## Deploying
