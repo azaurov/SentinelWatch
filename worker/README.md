@@ -4,11 +4,11 @@ A Cloudflare Worker that proxies SentinelWatch's Groq diagnosis requests, so
 `GROQ_API_KEY` lives only in Cloudflare's secret store — never in a `.env`
 file shipped with (or readable on) a user's desktop install.
 
-Standalone sub-project: it has its own `package.json`/`wrangler.toml` and is
-not currently called by the Electron app. `main.js` still talks to Groq
-directly (see the repo root `CLAUDE.md`). Wiring the app to this Worker is a
-follow-up: point `main.js`'s `fetch` at the deployed Worker URL instead of
-`api.groq.com`, and drop `GROQ_API_KEY` from the app's `.env`.
+Live at `https://sentinelwatch-groq-proxy.azaurov.workers.dev`. Standalone
+sub-project with its own `package.json`/`wrangler.toml`; `main.js` calls it
+via `SENTINELWATCH_WORKER_URL` in the app's `.env` (see the repo root
+`CLAUDE.md`). `GET /` also serves a small browser demo page (`src/demo.js`)
+for trying the endpoint without the desktop app — open the URL above.
 
 ## Setup
 
@@ -35,6 +35,10 @@ npm run deploy
 `wrangler deploy` prints the live `*.workers.dev` URL.
 
 ## API
+
+`GET /` returns the browser demo page — a form that POSTs a sample process
+snapshot to this same Worker and renders the diagnosis. Not used by the app;
+purely for trying the endpoint by hand.
 
 `POST /` with a JSON body shaped like the `info` object SentinelWatch's
 `diagnose-process` IPC handler receives:

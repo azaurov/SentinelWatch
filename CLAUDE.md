@@ -50,6 +50,9 @@ The preload is the only place that touches `ipcRenderer` directly.
 proxies to `https://api.groq.com/openai/v1/chat/completions`. `main.js` uses
 Node 18+ built-in `fetch`; no external SDK either side. The Worker's default
 model (`worker/wrangler.toml` `[vars] GROQ_MODEL`) is `openai/gpt-oss-120b`.
+Deployed at `https://sentinelwatch-groq-proxy.azaurov.workers.dev`; `GET /`
+on that URL serves a standalone browser demo page (`worker/src/demo.js`,
+not used by the app) for exercising the endpoint without the desktop app.
 
 **Prompt structure** (built in `worker/src/index.js`): system message carries
 the formatting instructions (`**What it is:**` etc.); user message carries the

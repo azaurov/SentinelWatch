@@ -1,9 +1,10 @@
 // Cloudflare Worker proxy for SentinelWatch's Groq diagnosis calls.
 //
 // Mirrors the request/response shape of the `diagnose-process` IPC handler in
-// main.js (see ../../main.js) so wiring the app to this Worker later is a
-// drop-in change: POST the same `info` object here instead of calling Groq
-// directly, and keep GROQ_API_KEY out of the client entirely.
+// main.js (see ../../main.js): the app POSTs the same `info` object here
+// instead of calling Groq directly, keeping GROQ_API_KEY out of the client
+// entirely. GET / serves a standalone demo page (demo.js) for trying the
+// proxy from a browser without the desktop app.
 //
 // Secrets:
 //   wrangler secret put GROQ_API_KEY
@@ -11,6 +12,8 @@
 // Vars (wrangler.toml [vars]):
 //   GROQ_MODEL     default model, e.g. "openai/gpt-oss-120b"
 //   ALLOWED_ORIGIN optional CORS allowlist ("*" or a comma-separated list)
+
+import { DEMO_PAGE } from './demo.js';
 
 const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 
@@ -44,6 +47,11 @@ export default {
 
     if (request.method === 'OPTIONS') {
       return new Response(null, { status: 204, headers: cors });
+    }
+
+    const url = new URL(request.url);
+    if (request.method === 'GET' && url.pathname === '/') {
+      return new Response(DEMO_PAGE, { headers: { 'Content-Type': 'text/html;charset=UTF-8' } });
     }
 
     if (request.method !== 'POST') {
