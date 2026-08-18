@@ -1,0 +1,14 @@
+{
+  "name": "sentinelwatch-groq-proxy",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cloudflare Worker that proxies SentinelWatch's Groq diagnosis requests, keeping GROQ_API_KEY server-side.",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "wrangler": "^4.123.0"
+  }
+}

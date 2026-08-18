@@ -1,0 +1,14 @@
+name = "sentinelwatch-groq-proxy"
+main = "src/index.js"
+compatibility_date = "2026-08-18"
+
+# Set the real value with:
+#   wrangler secret put GROQ_API_KEY
+# Never put the key itself in this file.
+[vars]
+GROQ_MODEL = "llama-3.3-70b-versatile"
+
+# Optional: restrict which Origins may call the worker (CORS).
+# Comma-separated list, e.g. "app://sentinelwatch,http://localhost:5173"
+# [vars]
+# ALLOWED_ORIGIN = "*"
